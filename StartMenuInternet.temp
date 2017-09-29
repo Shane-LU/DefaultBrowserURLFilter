@@ -5,31 +5,31 @@ Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\Capabilities]
 "ApplicationDescription"="DefaultBrowserURLFilter filters specified URL to use another browser other than the default browser."
-"ApplicationIcon"="$PATH,0"
-"ApplicationName"="DefaultBrowserURLFilter"
+"ApplicationIcon"="$Path,0"
+"ApplicationName"="$ApplicationName"
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\Capabilities\FileAssociations]
-".htm"="DefaultBrowserURLFilterHTML"
-".html"="DefaultBrowserURLFilterHTML"
-".shtml"="DefaultBrowserURLFilterHTML"
-".xht"="DefaultBrowserURLFilterHTML"
-".xhtml"="DefaultBrowserURLFilterHTML"
+".htm"="$ApplicationClass"
+".html"="$ApplicationClass"
+".shtml"="$ApplicationClass"
+".xht"="$ApplicationClass"
+".xhtml"="ApplicationClass"
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\Capabilities\StartMenu]
-"StartMenuInternet"="DefaultBrowserURLFilter.EXE"
+"StartMenuInternet"="$ApplicationName.EXE"
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\Capabilities\URLAssociations]
-"ftp"="DefaultBrowserURLFilterURL"
-"http"="DefaultBrowserURLFilterURL"
-"https"="DefaultBrowserURLFilterURL"
+"ftp"="$ApplicationClass"
+"http"="$ApplicationClass"
+"https"="$ApplicationClass"
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\DefaultIcon]
-@="$PATH,0"
+@="$Path,0"
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\InstallInfo]
-"HideIconsCommand"="$PATH -HideShortcuts"
-"ShowIconsCommand"="$PATH -ShowShortcuts"
-"ReinstallCommand"="$PATH -Install"
+"HideIconsCommand"="$Path -HideShortcuts"
+"ShowIconsCommand"="$Path -ShowShortcuts"
+"ReinstallCommand"="$Path -Install"
 "IconsVisible"=dword:00000001
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\shell]
@@ -37,6 +37,6 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\shell\open]
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet\DefaultBrowserURLFilter.EXE\shell\open\command]
-@="$PATH"
+@="\"$Path\""
 
 

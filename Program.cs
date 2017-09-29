@@ -9,20 +9,55 @@ using System.Threading.Tasks;
 
 namespace DefaultBrowserFilter
 {
-    enum BrowserApplication
+    static class Utility
     {
-        Unknown,
-        InternetExplorer,
-        Firefox,
-        Chrome,
-        Opera,
-        Safari,
-        Edge
+        static internal string ExpandTemplateString(this string regTemplate
+                                          , string oldString
+                                          , string newString)
+        {
+            return regTemplate.Replace(oldString, newString);
+        }
     }
 
     class Program
     {
+        const string programNamePlaceholder = "$ApplicationName";
         const string programName = "DefaultBrowserURLFilter";
+        const string applicationClassNamePlaceholder = "$ApplicationClass";
+        const string applicationClassName = "DefaultBrowserURLFilterURL";
+        const string applicationPathPlaceholder = "$Path";
+
+        static internal void RegImport(string regFileName)
+        {
+            Process regeditProcess = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = "reg.exe",
+                    Arguments = "import " + regFileName,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+            regeditProcess.Start();
+#if DEBUG
+            while (!regeditProcess.StandardOutput.EndOfStream)
+            {
+                string line = regeditProcess.StandardOutput.ReadLine();
+                Console.WriteLine(line);
+            }
+
+            Console.WriteLine("Error: ");
+            while (!regeditProcess.StandardError.EndOfStream)
+            {
+                string line = regeditProcess.StandardError.ReadLine();
+                Console.WriteLine(line);
+            }
+#endif
+            regeditProcess.WaitForExit();
+        }
 
         static internal void PrintHelp()
         {
@@ -42,32 +77,48 @@ namespace DefaultBrowserFilter
             var actionName = args[0];
             if (actionName == "-Install")
             {
-                // 1) HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet
-                //    HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Clients\StartMenuInternet
-                string contents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.temp"));
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Clients\StartMenuInternet
                 string localExecutableName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
                 localExecutableName = localExecutableName.Replace(@"\", @"\\");
-                localExecutableName = "\\\"" + localExecutableName + "\\\"";
-                contents = contents.Replace("$PATH", localExecutableName);
+
+                string contents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.temp"));
+                contents = contents.ExpandTemplateString(applicationClassNamePlaceholder, applicationClassName)
+                                   .ExpandTemplateString(applicationPathPlaceholder, localExecutableName)
+                                   .ExpandTemplateString(programNamePlaceholder, programName);
                 File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.reg"), contents);
-                Process regeditProcess = Process.Start("regedit.exe", "/s " + Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.reg"));
-                regeditProcess.WaitForExit();
+                RegImport(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.reg"));
 
-                const string startMenuInternet = @"SOFTWARE\Clients\StartMenuInternet";
-                using (RegistryKey startMenuInternetKey = Registry.LocalMachine.OpenSubKey(startMenuInternet))
+                // create the RegisteredApplications sub value
+                using (var registeredApplications = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\RegisteredApplications", true))
                 {
+                    if (registeredApplications != null)
+                    {
+                        registeredApplications.SetValue(programName, $"SOFTWARE\\Clients\\StartMenuInternet\\{programName}.EXE\\Capabilities");
+                    }
                 }
-                
 
-                // 2) HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https
+                // HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http
+                // HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https
                 string[] protocols = new string[] { "http", "https" };
                 foreach (var protocol in protocols)
                 {
 
                 }
                 // 3) HKEY_CLASSES_ROOT\ChromeHTML
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Classes
+                // 4) DefaultBrowserURLFilterURL
+                //    
             }
             else if (actionName == "-Open")
+            {
+
+            }
+            else if (actionName == "-HideShortcuts")
+            {
+
+            }
+            else if (actionName == "-ShowShortcuts")
             {
 
             }
