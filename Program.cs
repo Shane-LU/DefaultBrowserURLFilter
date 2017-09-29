@@ -120,7 +120,8 @@ namespace DefaultBrowserFilter
                 string[] protocols = new string[] { "http", "https" };
                 foreach (var protocol in protocols)
                 {
-
+                    // we could import it here, however, since the hash algorithm is private
+                    // doing it manually might be better 
                 }
 
                 // HKEY_CLASSES_ROOT\ChromeHTML
