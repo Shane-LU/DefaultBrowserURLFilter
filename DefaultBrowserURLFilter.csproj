@@ -48,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="CurrentUserClass.temp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="DefaultBrowserURLFilterHTML.temp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

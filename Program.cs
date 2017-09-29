@@ -26,6 +26,7 @@ namespace DefaultBrowserFilter
         const string applicationClassNamePlaceholder = "$ApplicationClass";
         const string applicationClassName = "DefaultBrowserURLFilterURL";
         const string applicationPathPlaceholder = "$Path";
+        static string localExecutableName = String.Empty;
 
         static internal void RegImport(string regFileName)
         {
@@ -64,8 +65,29 @@ namespace DefaultBrowserFilter
             // TODO: print something here
         }
 
+        static internal void ImportRegTemplate(string templateName)
+        {
+            const string tempfileName = "temp.reg";
+            string contents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, templateName));
+            contents = contents.ExpandTemplateString(applicationClassNamePlaceholder, applicationClassName)
+                               .ExpandTemplateString(applicationPathPlaceholder, localExecutableName)
+                               .ExpandTemplateString(programNamePlaceholder, programName);
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, tempfileName), contents);
+            RegImport(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, tempfileName));
+            System.IO.File.Delete(tempfileName);
+        }
+
         static void Main(string[] args)
         {
+#if DEBUG
+            foreach (var argument in args)
+            {
+                Console.WriteLine(argument);
+            }
+
+            // Console.ReadKey();
+#endif 
+
             // parameter handling: 
             // 1) -Install 
             // 2) -Open
@@ -77,17 +99,12 @@ namespace DefaultBrowserFilter
             var actionName = args[0];
             if (actionName == "-Install")
             {
-                // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet
-                // HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Clients\StartMenuInternet
-                string localExecutableName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
+                localExecutableName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
                 localExecutableName = localExecutableName.Replace(@"\", @"\\");
 
-                string contents = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.temp"));
-                contents = contents.ExpandTemplateString(applicationClassNamePlaceholder, applicationClassName)
-                                   .ExpandTemplateString(applicationPathPlaceholder, localExecutableName)
-                                   .ExpandTemplateString(programNamePlaceholder, programName);
-                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.reg"), contents);
-                RegImport(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StartMenuInternet.reg"));
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\StartMenuInternet
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Clients\StartMenuInternet
+                ImportRegTemplate("StartMenuInternet.temp");
 
                 // create the RegisteredApplications sub value
                 using (var registeredApplications = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\RegisteredApplications", true))
@@ -105,14 +122,15 @@ namespace DefaultBrowserFilter
                 {
 
                 }
-                // 3) HKEY_CLASSES_ROOT\ChromeHTML
+
+                // HKEY_CLASSES_ROOT\ChromeHTML
                 // HKEY_LOCAL_MACHINE\SOFTWARE\Classes
-                // 4) DefaultBrowserURLFilterURL
-                //    
+                ImportRegTemplate("DefaultBrowserURLFilterHTML.temp");
+                ImportRegTemplate("CurrentUserClass.temp");
             }
             else if (actionName == "-Open")
             {
-
+                // TODO execute different browsers based on the input parameters
             }
             else if (actionName == "-HideShortcuts")
             {
